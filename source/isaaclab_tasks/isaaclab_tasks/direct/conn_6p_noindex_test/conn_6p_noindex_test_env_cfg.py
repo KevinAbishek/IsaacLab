@@ -8,7 +8,7 @@ from isaaclab.assets import RigidObjectCfg
 from isaaclab.envs import DirectRLEnvCfg
 from isaaclab.scene import InteractiveSceneCfg
 from isaaclab.sim import SimulationCfg
-from isaaclab.sim.spawners.shapes import CylinderCfg, SphereCfg
+from isaaclab.sim.spawners.from_files import UsdFileCfg
 from isaaclab.utils import configclass
 
 
@@ -27,25 +27,20 @@ class Conn6pNoindexTestEnvCfg(DirectRLEnvCfg):
     # scene
     scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=4.0, replicate_physics=True)
 
-    # connectors — placeholder shapes until USD assets are provided
+    # connectors — USD assets (mass and collision properties defined in USD)
     female_connector_cfg: RigidObjectCfg = RigidObjectCfg(
         prim_path="/World/envs/env_.*/FemaleConnector",
-        spawn=SphereCfg(
-            radius=0.02,
+        spawn=UsdFileCfg(
+            usd_path="/path/to/female_connector.usd",  # TODO: replace with actual path
             rigid_props=sim_utils.RigidBodyPropertiesCfg(kinematic_enabled=True),
-            mass_props=sim_utils.MassPropertiesCfg(mass=1.0),
-            collision_props=sim_utils.CollisionPropertiesCfg(),
         ),
         init_state=RigidObjectCfg.InitialStateCfg(pos=(0.0, 0.0, 0.0)),
     )
     male_connector_cfg: RigidObjectCfg = RigidObjectCfg(
         prim_path="/World/envs/env_.*/MaleConnector",
-        spawn=CylinderCfg(
-            radius=0.01,
-            height=0.04,
+        spawn=UsdFileCfg(
+            usd_path="/path/to/male_connector.usd",  # TODO: replace with actual path
             rigid_props=sim_utils.RigidBodyPropertiesCfg(kinematic_enabled=False, disable_gravity=True),
-            mass_props=sim_utils.MassPropertiesCfg(mass=0.1),
-            collision_props=sim_utils.CollisionPropertiesCfg(),
         ),
         init_state=RigidObjectCfg.InitialStateCfg(pos=(0.0, 0.0, 0.1)),
     )

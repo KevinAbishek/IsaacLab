@@ -14,6 +14,7 @@ from isaaclab.assets import RigidObject
 from isaaclab.envs import DirectRLEnv
 from isaaclab.sim.spawners.from_files import GroundPlaneCfg, spawn_ground_plane
 from isaaclab.utils.math import (
+    quat_apply,
     quat_apply_inverse,
     quat_error_magnitude,
     quat_from_euler_xyz,
@@ -57,8 +58,12 @@ class Conn6pNoindexTestEnv(DirectRLEnv):
         self._torques[:, 0, :] = actions[:, 3:] * self.cfg.torque_scale
 
     def _apply_action(self) -> None:
-        self.male_connector.permanent_wrench_composer.set_forces_and_torques(
-            forces=self._forces, torques=self._torques
+        # actions are in male connector body frame — rotate into world frame before applying
+        male_quat = self.male_connector.data.root_link_quat_w  # (N, 4)
+        world_forces = quat_apply(male_quat, self._forces[:, 0, :]).unsqueeze(1)   # (N, 1, 3)
+        world_torques = quat_apply(male_quat, self._torques[:, 0, :]).unsqueeze(1) # (N, 1, 3)
+        self.male_connector.set_external_force_and_torque(
+            forces=world_forces, torques=world_torques
         )
 
     def _get_observations(self) -> dict:
