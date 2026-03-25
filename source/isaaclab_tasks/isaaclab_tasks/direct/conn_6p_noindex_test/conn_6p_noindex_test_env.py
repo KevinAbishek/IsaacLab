@@ -36,6 +36,11 @@ class Conn6pNoindexTestEnv(DirectRLEnv):
         self._forces = torch.zeros(self.num_envs, 1, 3, device=self.device)
         self._torques = torch.zeros(self.num_envs, 1, 3, device=self.device)
 
+        # pre-allocate reward/done buffers
+        self._dist = torch.zeros(self.num_envs, device=self.device)
+        self._orient_err = torch.zeros(self.num_envs, device=self.device)
+        self._success = torch.zeros(self.num_envs, dtype=torch.bool, device=self.device)
+
     def _setup_scene(self):
         self.female_connector = RigidObject(self.cfg.female_connector_cfg)
         self.male_connector = RigidObject(self.cfg.male_connector_cfg)

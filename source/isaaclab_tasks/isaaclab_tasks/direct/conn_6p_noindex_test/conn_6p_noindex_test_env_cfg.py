@@ -3,7 +3,6 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-import isaaclab.sim as sim_utils
 from isaaclab.assets import RigidObjectCfg
 from isaaclab.envs import DirectRLEnvCfg
 from isaaclab.scene import InteractiveSceneCfg
@@ -31,18 +30,16 @@ class Conn6pNoindexTestEnvCfg(DirectRLEnvCfg):
     female_connector_cfg: RigidObjectCfg = RigidObjectCfg(
         prim_path="/World/envs/env_.*/FemaleConnector",
         spawn=UsdFileCfg(
-            usd_path="/path/to/female_connector.usd",  # TODO: replace with actual path
-            rigid_props=sim_utils.RigidBodyPropertiesCfg(kinematic_enabled=True),
+            usd_path="/workspace/AIITests/USD/ConnectorCADs/FemaleConn_6P_NoIndex.usd",
         ),
-        init_state=RigidObjectCfg.InitialStateCfg(pos=(0.0, 0.0, 0.0)),
+        init_state=RigidObjectCfg.InitialStateCfg(pos=(0.0, 0.0, 15), rot=(0.0, 0.0, 1.0, 0.0)),
     )
     male_connector_cfg: RigidObjectCfg = RigidObjectCfg(
         prim_path="/World/envs/env_.*/MaleConnector",
         spawn=UsdFileCfg(
-            usd_path="/path/to/male_connector.usd",  # TODO: replace with actual path
-            rigid_props=sim_utils.RigidBodyPropertiesCfg(kinematic_enabled=False, disable_gravity=True),
+            usd_path="/workspace/AIITests/USD/ConnectorCADs/MaleConn_6P_NoIndex.usd",
         ),
-        init_state=RigidObjectCfg.InitialStateCfg(pos=(0.0, 0.0, 0.1)),
+        init_state=RigidObjectCfg.InitialStateCfg(pos=(60, 0.0, 60), rot=(0.0, 0.0, 1.0, 0.0)),
     )
 
     # initialization: conical space
