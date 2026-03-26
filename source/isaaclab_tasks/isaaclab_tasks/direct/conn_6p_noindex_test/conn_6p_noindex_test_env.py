@@ -126,43 +126,46 @@ class Conn6pNoindexTestEnv(DirectRLEnv):
         self.female_connector.write_root_com_velocity_to_sim(female_default[:, 7:], env_ids=env_ids)
 
         # -- sample random starting pose for male connector within cone around Z axis
-        half_angle_rad = math.radians(self.cfg.cone_half_angle)
+        # half_angle_rad = math.radians(self.cfg.cone_half_angle)
 
-        # azimuth: uniform in [0, 2π)
-        phi = sample_uniform(0.0, 2.0 * math.pi, (num_resets,), self.device)
-        # elevation: uniform in [0, half_angle_rad]
-        theta = sample_uniform(0.0, half_angle_rad, (num_resets,), self.device)
-        # distance
-        r = sample_uniform(self.cfg.init_distance_range[0], self.cfg.init_distance_range[1], (num_resets,), self.device)
+        # # azimuth: uniform in [0, 2π)
+        # phi = sample_uniform(0.0, 2.0 * math.pi, (num_resets,), self.device)
+        # # elevation: uniform in [0, half_angle_rad]
+        # theta = sample_uniform(0.0, half_angle_rad, (num_resets,), self.device)
+        # # distance
+        # r = sample_uniform(self.cfg.init_distance_range[0], self.cfg.init_distance_range[1], (num_resets,), self.device)
 
-        # Cartesian offset in female local frame (cone around +Z)
-        sin_theta = torch.sin(theta)
-        offset_x = r * sin_theta * torch.cos(phi)
-        offset_y = r * sin_theta * torch.sin(phi)
-        offset_z = r * torch.cos(theta)
-        cone_offset = torch.stack([offset_x, offset_y, offset_z], dim=-1)  # (num_resets, 3)
+        # # Cartesian offset in female local frame (cone around +Z)
+        # sin_theta = torch.sin(theta)
+        # offset_x = r * sin_theta * torch.cos(phi)
+        # offset_y = r * sin_theta * torch.sin(phi)
+        # offset_z = r * torch.cos(theta)
+        # cone_offset = torch.stack([offset_x, offset_y, offset_z], dim=-1)  # (num_resets, 3)
 
-        # female position in world frame
-        female_pos_w = female_default[:, :3]  # already has env_origins added
-        male_pos_w = female_pos_w + cone_offset
+        # # female position in world frame
+        # female_pos_w = female_default[:, :3]  # already has env_origins added
+        # male_pos_w = female_pos_w + cone_offset
 
-        # -- sample orientation offsets around X and Z axes
-        rot_x = sample_uniform(
-            self.cfg.init_rot_x_range[0], self.cfg.init_rot_x_range[1], (num_resets,), self.device
-        )
-        rot_z = sample_uniform(
-            self.cfg.init_rot_z_range[0], self.cfg.init_rot_z_range[1], (num_resets,), self.device
-        )
-        zeros = torch.zeros(num_resets, device=self.device)
+        # # -- sample orientation offsets around X and Z axes
+        # rot_x = sample_uniform(
+        #     self.cfg.init_rot_x_range[0], self.cfg.init_rot_x_range[1], (num_resets,), self.device
+        # )
+        # rot_z = sample_uniform(
+        #     self.cfg.init_rot_z_range[0], self.cfg.init_rot_z_range[1], (num_resets,), self.device
+        # )
+        # zeros = torch.zeros(num_resets, device=self.device)
 
-        # compose orientation: start from female quat, apply X then Z rotation offset
-        female_quat_w = female_default[:, 3:7]
-        delta_quat_x = quat_from_euler_xyz(rot_x, zeros, zeros)      # roll around X
-        delta_quat_z = quat_from_euler_xyz(zeros, zeros, rot_z)       # yaw around Z
-        delta_quat = quat_mul(delta_quat_z, delta_quat_x)
-        male_quat_w = quat_mul(female_quat_w, delta_quat)
+        # # compose orientation: start from female quat, apply X then Z rotation offset
+        # female_quat_w = female_default[:, 3:7]
+        # delta_quat_x = quat_from_euler_xyz(rot_x, zeros, zeros)      # roll around X
+        # delta_quat_z = quat_from_euler_xyz(zeros, zeros, rot_z)       # yaw around Z
+        # delta_quat = quat_mul(delta_quat_z, delta_quat_x)
+        # male_quat_w = quat_mul(female_quat_w, delta_quat)
 
-        male_pose_w = torch.cat([male_pos_w, male_quat_w], dim=-1)
+        # -- use default pose from cfg (no randomization)
+        male_default = self.male_connector.data.default_root_state[env_ids].clone()
+        male_default[:, :3] += self.scene.env_origins[env_ids]
+        male_pose_w = male_default[:, :7]
         zero_vel = torch.zeros(num_resets, 6, device=self.device)
 
         self.male_connector.write_root_link_pose_to_sim(male_pose_w, env_ids=env_ids)

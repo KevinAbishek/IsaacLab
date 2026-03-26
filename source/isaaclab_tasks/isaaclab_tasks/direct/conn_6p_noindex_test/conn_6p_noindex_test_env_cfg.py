@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 from isaaclab.assets import RigidObjectCfg
-from isaaclab.envs import DirectRLEnvCfg
+from isaaclab.envs import DirectRLEnvCfg, ViewerCfg
 from isaaclab.scene import InteractiveSceneCfg
 from isaaclab.sim import SimulationCfg
 from isaaclab.sim.spawners.from_files import UsdFileCfg
@@ -20,6 +20,9 @@ class Conn6pNoindexTestEnvCfg(DirectRLEnvCfg):
     observation_space = 13  # rel_pos(3) + rel_quat(4) + lin_vel(3) + ang_vel(3)
     state_space = 0
 
+    # viewer
+    viewer: ViewerCfg = ViewerCfg(eye=(0.3, 0.3, 0.3), lookat=(0.0, 0.0, 0.0))
+
     # simulation
     sim: SimulationCfg = SimulationCfg(dt=1 / 120, render_interval=decimation)
 
@@ -31,15 +34,17 @@ class Conn6pNoindexTestEnvCfg(DirectRLEnvCfg):
         prim_path="/World/envs/env_.*/FemaleConnector",
         spawn=UsdFileCfg(
             usd_path="/workspace/AIITests/USD/ConnectorCADs/FemaleConn_6P_NoIndex.usd",
+            scale=(0.001, 0.001, 0.001),
         ),
-        init_state=RigidObjectCfg.InitialStateCfg(pos=(0.0, 0.0, 15), rot=(0.0, 0.0, 1.0, 0.0)),
+        init_state=RigidObjectCfg.InitialStateCfg(pos=(0.0, 0.0, 0.015), rot=(0.0, 0.0, 1.0, 0.0)),
     )
     male_connector_cfg: RigidObjectCfg = RigidObjectCfg(
         prim_path="/World/envs/env_.*/MaleConnector",
         spawn=UsdFileCfg(
             usd_path="/workspace/AIITests/USD/ConnectorCADs/MaleConn_6P_NoIndex.usd",
+            scale=(0.001, 0.001, 0.001),
         ),
-        init_state=RigidObjectCfg.InitialStateCfg(pos=(60, 0.0, 60), rot=(0.0, 0.0, 1.0, 0.0)),
+        init_state=RigidObjectCfg.InitialStateCfg(pos=(0.0, 0.0, 0.070), rot=(1.0, 0.0, 0.0, 0.0)),
     )
 
     # initialization: conical space
