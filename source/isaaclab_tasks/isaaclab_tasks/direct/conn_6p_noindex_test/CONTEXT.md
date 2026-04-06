@@ -92,7 +92,51 @@ r = -1.0 * dist
 
 ---
 
+## Contact Sensor Notes
+
+### What `ContactSensor` reports
+- **`net_forces_w` (N, B, 3)**: Net **normal** contact reaction force acting ON the male connector,
+  summed across all contact points on the body. Normal component only — does not include friction.
+- **`friction_forces_w` (N, B, M, 3)**: Tangential friction forces (requires
+  `track_friction_forces=True` and `filter_prim_paths_expr` pointing to the female connector).
+- **Not available**: Contact torques/moments, individual contact point force vectors.
+
+### Stable contact steady-state (flush face, constant force applied)
+- `net_forces_w` ≈ reaction equal and opposite to the applied external force (Newton's 3rd law).
+  E.g. 10 N applied in −Z → sensor reads `[0, 0, +10]` in world frame.
+- `friction_forces_w` ≈ `[0, 0, 0]` if the applied force is purely normal (no lateral loading).
+- Before contact: all force fields are zero.
+- During insertion (pins engaging): forces spike axially/laterally, then relax once fully seated.
+
+### Enabling the reporter
+Two equivalent options:
+
+**Option A — code flag (applied at spawn time, not baked into USD):**
+```python
+spawn=UsdFileCfg(..., activate_contact_sensors=True)
+```
+This applies `PhysxContactReportAPI` + sets `sleepThreshold=0.0` on all rigid body prims.
+
+**Option B — bake into USD via Omniverse UI (persistent, no code flag needed):**
+1. Open the USD in Omniverse, select the rigid body prim.
+2. Property panel → Add → `PhysxContactReportAPI`, set `threshold = 0.0`.
+3. Also set `PhysxRigidBodyAPI:sleepThreshold = 0.0`.
+4. Save USD — reporter is now permanent in the asset.
+
+### Force application is independent of ContactReportAPI
+`PhysxContactReportAPI` is a passive reporting callback only. It does not affect how forces are
+applied to the body. Force sources on the male connector:
+| Source | Mechanism |
+|--------|-----------|
+| Gravity | Auto by PhysX (mass in USD) |
+| External wrench | `set_external_force_and_torque()` in `_apply_action()` |
+| Contact constraint | PhysX solver (non-penetration) |
+| Damping | `PhysxRigidBodyAPI` linear/angular damping in USD |
+
+---
+
 ## Key References
 - IsaacLab `ContactSensor`: `source/isaaclab/isaaclab/sensors/contact_sensor/`
 - IsaacLab math utils: `source/isaaclab/isaaclab/utils/math.py`
 - `DirectRLEnv` base: `source/isaaclab/isaaclab/envs/direct_rl_env.py`
+- `activate_contact_sensors` impl: `source/isaaclab/isaaclab/sim/schemas/schemas.py`
