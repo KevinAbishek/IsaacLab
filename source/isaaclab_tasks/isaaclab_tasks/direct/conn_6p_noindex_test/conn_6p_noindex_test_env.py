@@ -12,6 +12,7 @@ from collections.abc import Sequence
 import isaaclab.sim as sim_utils
 from isaaclab.assets import RigidObject
 from isaaclab.envs import DirectRLEnv
+from isaaclab.sensors import ContactSensor
 from isaaclab.sim.spawners.from_files import GroundPlaneCfg, spawn_ground_plane
 from isaaclab.utils.math import (
     quat_apply,
@@ -44,6 +45,7 @@ class Conn6pNoindexTestEnv(DirectRLEnv):
     def _setup_scene(self):
         self.female_connector = RigidObject(self.cfg.female_connector_cfg)
         self.male_connector = RigidObject(self.cfg.male_connector_cfg)
+        self.male_contact_sensor = ContactSensor(self.cfg.male_contact_sensor_cfg)
         # add ground plane
         spawn_ground_plane(prim_path="/World/ground", cfg=GroundPlaneCfg())
         # clone and replicate
@@ -54,6 +56,7 @@ class Conn6pNoindexTestEnv(DirectRLEnv):
         # register in scene
         self.scene.rigid_objects["female_connector"] = self.female_connector
         self.scene.rigid_objects["male_connector"] = self.male_connector
+        self.scene.sensors["male_contact"] = self.male_contact_sensor
         # add lights
         light_cfg = sim_utils.DomeLightCfg(intensity=2000.0, color=(0.75, 0.75, 0.75))
         light_cfg.func("/World/Light", light_cfg)
@@ -82,7 +85,10 @@ class Conn6pNoindexTestEnv(DirectRLEnv):
         rel_pos = quat_apply_inverse(female_quat, male_pos - female_pos)  # in female frame
         rel_quat = quat_mul(quat_inv(female_quat), male_quat)
 
-        obs = torch.cat([rel_pos, rel_quat, lin_vel, ang_vel], dim=-1)  # (N, 13)
+        # net normal contact force on male connector, world frame — (N, 3)
+        contact_forces = self.male_contact_sensor.data.net_forces_w[:, 0, :]
+
+        obs = torch.cat([rel_pos, rel_quat, lin_vel, ang_vel, contact_forces], dim=-1)  # (N, 16)
         return {"policy": obs}
 
     def _get_rewards(self) -> torch.Tensor:

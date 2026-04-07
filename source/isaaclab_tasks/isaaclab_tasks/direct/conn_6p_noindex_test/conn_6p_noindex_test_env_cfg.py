@@ -18,7 +18,7 @@ class Conn6pNoindexTestEnvCfg(DirectRLEnvCfg):
     decimation = 2
     episode_length_s = 5.0
     action_space = 6       # fx, fy, fz, tx, ty, tz
-    observation_space = 13  # rel_pos(3) + rel_quat(4) + lin_vel(3) + ang_vel(3)
+    observation_space = 16  # rel_pos(3) + rel_quat(4) + lin_vel(3) + ang_vel(3) + contact_forces(3)
     state_space = 0
 
     # viewer
