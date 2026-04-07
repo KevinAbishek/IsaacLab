@@ -65,6 +65,9 @@ class Conn6pNoindexTestEnvCfg(DirectRLEnvCfg):
     force_scale: float = 10.0   # N
     torque_scale: float = 1.0   # N·m
 
+    # constant world-frame Z force applied regardless of RL actions (N, negative = downward)
+    fixed_force_z: float = 0.0
+
     # reward scales
     rew_scale_distance: float = -1.0
     rew_scale_orientation: float = -0.5

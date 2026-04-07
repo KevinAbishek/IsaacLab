@@ -68,10 +68,14 @@ class Conn6pNoindexTestEnv(DirectRLEnv):
     def _apply_action(self) -> None:
         # actions are in male connector body frame — rotate into world frame before applying
         male_quat = self.male_connector.data.root_link_quat_w  # (N, 4)
-        world_forces = quat_apply(male_quat, self._forces[:, 0, :]).unsqueeze(1)   # (N, 1, 3)
-        world_torques = quat_apply(male_quat, self._torques[:, 0, :]).unsqueeze(1) # (N, 1, 3)
+        world_forces = quat_apply(male_quat, self._forces[:, 0, :])    # (N, 3)
+        world_torques = quat_apply(male_quat, self._torques[:, 0, :])  # (N, 3)
+
+        # add constant world-frame Z force (e.g. to push male connector toward female)
+        world_forces[:, 2] += self.cfg.fixed_force_z
+
         self.male_connector.set_external_force_and_torque(
-            forces=world_forces, torques=world_torques
+            forces=world_forces.unsqueeze(1), torques=world_torques.unsqueeze(1)
         )
 
     def _get_observations(self) -> dict:
