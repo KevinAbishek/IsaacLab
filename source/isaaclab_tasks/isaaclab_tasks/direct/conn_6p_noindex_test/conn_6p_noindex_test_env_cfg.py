@@ -66,7 +66,7 @@ class Conn6pNoindexTestEnvCfg(DirectRLEnvCfg):
     torque_scale: float = 1.0   # N·m
 
     # constant world-frame Z force applied regardless of RL actions (N, negative = downward)
-    fixed_force_z: float = 0.0
+    fixed_force_z: float = -5.0  # ← change this value
 
     # reward scales
     rew_scale_distance: float = -1.0
