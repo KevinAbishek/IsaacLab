@@ -6,6 +6,7 @@
 from isaaclab.assets import RigidObjectCfg
 from isaaclab.envs import DirectRLEnvCfg, ViewerCfg
 from isaaclab.scene import InteractiveSceneCfg
+from isaaclab.sensors import ContactSensorCfg
 from isaaclab.sim import SimulationCfg
 from isaaclab.sim.spawners.from_files import UsdFileCfg
 from isaaclab.utils import configclass
@@ -45,6 +46,13 @@ class Conn6pNoindexTestEnvCfg(DirectRLEnvCfg):
             scale=(0.001, 0.001, 0.001),
         ),
         init_state=RigidObjectCfg.InitialStateCfg(pos=(0.0, 0.0, 0.070), rot=(1.0, 0.0, 0.0, 0.0)),
+    )
+
+    # contact sensor on male connector (PhysxContactReportAPI already baked into USD at threshold=0)
+    male_contact_sensor_cfg: ContactSensorCfg = ContactSensorCfg(
+        prim_path="/World/envs/env_.*/MaleConnector",
+        history_length=1,
+        update_period=0.0,  # update every physics step (120 Hz)
     )
 
     # initialization: conical space
