@@ -91,6 +91,7 @@ class Conn6pNoindexTestEnv(DirectRLEnv):
 
         # net normal contact force on male connector, world frame — (N, 3)
         contact_forces = self.male_contact_sensor.data.net_forces_w[:, 0, :]
+        print(f"contact_forces: {contact_forces[0]}")
 
         obs = torch.cat([rel_pos, rel_quat, lin_vel, ang_vel, contact_forces], dim=-1)  # (N, 16)
         return {"policy": obs}
